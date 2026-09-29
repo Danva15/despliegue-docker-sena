@@ -1,4 +1,5 @@
 const express = require("express");
+const pool = require("./db");
 
 const app = express();
 const PORT = 3000;
@@ -9,10 +10,28 @@ mensaje: "API de despliegue Docker funcionando"
 });
 });
 
-app.get("/health", (request, response) => {
+app.get("/health", async (request, response) => {
+try {
+await pool.query("SELECT 1");
+
+
 response.json({
-estado: "ok"
+  estado: "ok",
+  base_datos: "ok"
 });
+
+
+} catch (error) {
+console.error("Error de conexión con PostgreSQL:", error);
+
+
+response.status(500).json({
+  estado: "error",
+  base_datos: "error"
+});
+
+
+}
 });
 
 app.listen(PORT, () => {
