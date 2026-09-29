@@ -47,3 +47,65 @@ This message shows that your installation appears to be working correctly.
 ```
 
 Con esta prueba se verificó que Docker Engine puede descargar imágenes, crear contenedores y ejecutarlos correctamente.
+
+## Pruebas de imágenes Docker
+
+Se verificó el funcionamiento de las imágenes base requeridas para la solución:
+
+### Nginx
+
+Imagen utilizada:
+
+```text
+nginx:1.30-alpine
+```
+
+Se creó un contenedor temporal y se publicó el puerto interno `80` mediante el puerto `8080` del host.
+
+La prueba con:
+
+```bash
+curl http://localhost:8080
+```
+
+devolvió correctamente la página predeterminada de Nginx, confirmando que el servidor web estaba funcionando.
+
+### PostgreSQL
+
+Imagen utilizada:
+
+```text
+postgres:18-alpine
+```
+
+Se creó un contenedor temporal sin publicar el puerto `5432` al host.
+
+Los registros del contenedor confirmaron:
+
+```text
+database system is ready to accept connections
+```
+
+La prueba se realizó sin interferir con el contenedor PostgreSQL del proyecto anterior.
+
+### Node.js
+
+Imagen utilizada:
+
+```text
+node:24-alpine
+```
+
+Se verificó la ejecución de Node.js mediante:
+
+```bash
+docker run --rm node:24-alpine node --version
+```
+
+Resultado obtenido:
+
+```text
+v24.21.0
+```
+
+Con estas pruebas se verificó que las imágenes base requeridas están disponibles y pueden ejecutarse correctamente mediante Docker.
