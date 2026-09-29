@@ -6,63 +6,106 @@
 * **Arquitectura:** x86_64
 * **Kernel:** 7.0.0-29-generic
 
+## Ruta de instalación
+
+* **Ruta seleccionada:** 2A — Ubuntu nativo con Docker Engine.
+
+Docker Engine se utiliza directamente como servicio del sistema operativo, sin Docker Desktop.
+
 ## Recursos del equipo
 
 * **Memoria RAM total:** 7,7 GiB
-* **Memoria disponible durante la comprobación:** 3,8 GiB
-* **Espacio disponible en la partición raíz:** 29 GB
+* **Memoria disponible durante la comprobación:** 1,6 GiB
+* **Espacio disponible en la partición raíz:** 28 GB
 
 ## Docker Engine
 
 * **Versión:** Docker 29.6.2
 * **Build:** dfc4efb
 
-La instalación de Docker Engine fue comprobada mediante la ejecución del contenedor de prueba `hello-world`.
+Salida de `docker --version`:
 
-El resultado confirmó que el cliente Docker pudo comunicarse con el daemon, descargar la imagen desde Docker Hub, crear el contenedor y ejecutarlo correctamente.
+Docker version 29.6.2, build dfc4efb
+
+
+El servicio Docker se encuentra habilitado y ejecutándose mediante systemd.
+
+Estado comprobado:
+
+
+Loaded: loaded (...); enabled
+Active: active (running)
+
 
 ## Docker Compose
 
 * **Versión:** Docker Compose v5.3.1
 
+Salida de `docker compose version`:
+
+
+Docker Compose version v5.3.1
+
+
 Docker Compose está disponible mediante el comando:
 
-```bash
+
 docker compose
-```
 
-## Comprobación realizada
 
-Se ejecutó el siguiente comando:
+## Información del motor
 
-```bash
-docker run hello-world
-```
+La información básica del motor se verificó mediante:
 
-El resultado fue:
 
-```text
+docker info | head -20
+
+
+La comprobación confirmó:
+
+
+Client: Docker Engine - Community
+Version: 29.6.2
+Context: default
+
+Server:
+Server Version: 29.6.2
+Storage Driver: overlayfs
+
+
+## Comprobación de funcionamiento
+
+Se ejecutó:
+
+
+docker run --rm hello-world
+
+
+El resultado comenzó con:
+
+
 Hello from Docker!
-This message shows that your installation appears to be working correctly.
-```
 
-Con esta prueba se verificó que Docker Engine puede descargar imágenes, crear contenedores y ejecutarlos correctamente.
+This message shows that your installation appears to be working correctly.
+
+
+Esta prueba confirmó que el cliente Docker puede comunicarse con el daemon, descargar imágenes desde Docker Hub, crear contenedores y ejecutarlos correctamente.
 
 ## Pruebas de imágenes Docker
 
-Se verificó el funcionamiento de las imágenes base requeridas para la solución:
+Se verificó el funcionamiento de las imágenes base requeridas para la solución.
 
 ### Nginx
 
 Imagen utilizada:
 
-```text
+
 nginx:1.30-alpine
-```
+
 
 Se creó un contenedor temporal y se publicó el puerto interno `80` mediante el puerto `8080` del host.
 
-La prueba con:
+La prueba mediante:
 
 ```bash
 curl http://localhost:8080
@@ -74,17 +117,17 @@ devolvió correctamente la página predeterminada de Nginx, confirmando que el s
 
 Imagen utilizada:
 
-```text
+
 postgres:18-alpine
-```
+
 
 Se creó un contenedor temporal sin publicar el puerto `5432` al host.
 
 Los registros del contenedor confirmaron:
 
-```text
+
 database system is ready to accept connections
-```
+
 
 La prueba se realizó sin interferir con el contenedor PostgreSQL del proyecto anterior.
 
@@ -92,9 +135,9 @@ La prueba se realizó sin interferir con el contenedor PostgreSQL del proyecto a
 
 Imagen utilizada:
 
-```text
+
 node:24-alpine
-```
+
 
 Se verificó la ejecución de Node.js mediante:
 
@@ -104,8 +147,16 @@ docker run --rm node:24-alpine node --version
 
 Resultado obtenido:
 
-```text
+
 v24.21.0
-```
+
 
 Con estas pruebas se verificó que las imágenes base requeridas están disponibles y pueden ejecutarse correctamente mediante Docker.
+
+## Inconvenientes y observaciones
+
+El entorno Docker Engine ya se encontraba instalado y operativo al momento de realizar la actividad, por lo que no fue necesario realizar una reinstalación.
+
+La instalación existente fue verificada mediante `docker --version`, `docker compose version`, la comprobación del servicio Docker, `docker info` y la ejecución del contenedor `hello-world`.
+
+No se utilizó Docker Desktop, de acuerdo con la ruta de instalación establecida para Ubuntu nativo.
