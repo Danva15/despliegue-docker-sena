@@ -114,3 +114,44 @@ Build Cache     40        0        353.2MB
 
 
 Esta información permite identificar el espacio ocupado por imágenes, contenedores, volúmenes y caché de construcción.
+
+## Persistencia de PostgreSQL
+
+El servicio PostgreSQL utiliza un volumen Docker denominado `postgres_data`, configurado en `compose.yaml`:
+
+```yaml
+volumes:
+  - postgres_data:/var/lib/postgresql
+```
+Docker crea este volumen para el proyecto como
+
+```text
+despliegue-docker-sena_postgres_data
+
+
+Para comprobar la persistencia se insertó un registro de prueba en la tabla mensajes:
+
+```bash
+    Prueba de persistencia AA3
+```
+Posteriormente se eliminó únicamente el contenedor PostgreSQL:
+
+```bash
+docker rm -f despliegue-postgres
+```
+
+El contenedor se volvió a crear mediante:
+
+```bash
+docker compose up -d postgres
+```
+
+Finalmente se consultó nuevamente la tabla:
+
+```bash
+docker exec -it despliegue-postgres psql -U app_user -d despliegue_db -c "SELECT * FROM mensajes;"
+```
+
+El registro Prueba de persistencia AA3 continuó disponible después de recrear el contenedor.
+
+Esto demuestra que los datos de PostgreSQL se mantienen en el volumen Docker y sobreviven a la eliminación y recreación del contenedor.
