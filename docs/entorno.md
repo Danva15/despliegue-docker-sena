@@ -160,3 +160,95 @@ El entorno Docker Engine ya se encontraba instalado y operativo al momento de re
 La instalación existente fue verificada mediante `docker --version`, `docker compose version`, la comprobación del servicio Docker, `docker info` y la ejecución del contenedor `hello-world`.
 
 No se utilizó Docker Desktop, de acuerdo con la ruta de instalación establecida para Ubuntu nativo.
+
+
+## Orquestación con Docker Compose
+
+La solución se ejecuta mediante Docker Compose y está compuesta por tres servicios:
+
+* `despliegue-postgres`: base de datos PostgreSQL.
+* `despliegue-api`: API desarrollada con Node.js y Express.
+* `despliegue-nginx`: proxy inverso Nginx.
+
+Los tres servicios se conectan mediante la red interna de Docker denominada `interna`.
+
+La solución completa se levantó mediante:
+
+```bash
+docker compose up -d --build
+```
+El estado de los servicios se verificó mediante:
+
+docker compose ps
+
+Resultado:
+
+despliegue-api       Up
+despliegue-nginx     Up
+despliegue-postgres  Up (healthy)
+
+PostgreSQL utiliza un healthcheck basado en pg_isready. La API depende de este estado saludable antes de iniciar.
+
+Proxy inverso Nginx
+
+Nginx es el único servicio que publica un puerto hacia el equipo host:
+
+0.0.0.0:8080 -> 80/tcp
+
+Las peticiones recibidas en el puerto 8080 son reenviadas internamente hacia la API mediante el nombre de servicio Docker api y el puerto 3000.
+
+La API no publica directamente el puerto 3000 hacia el host. Esto se comprobó mediante:
+
+```bash
+curl http://localhost:3000/health
+```
+
+La conexión fue rechazada, confirmando que la API no está expuesta directamente.
+
+Sin embargo, desde el contenedor de Nginx sí fue posible acceder a la API:
+
+```bash
+docker exec despliegue-nginx wget -qO- http://api:3000/health
+```
+
+Resultado:
+
+```bash
+{"estado":"ok","base_datos":"ok"}
+```
+
+Comprobación del acceso mediante el proxy
+
+La petición realizada a través del puerto publicado por Nginx:
+
+```bash
+curl -i http://localhost:8080/health
+```
+
+respondió con:
+
+HTTP/1.1 200 OK
+
+y:
+
+```bash
+{"estado":"ok","base_datos":"ok"}
+```
+
+Esto confirma el flujo de comunicación:
+
+Cliente
+   |
+   | localhost:8080
+   v
+Nginx
+   |
+   | api:3000
+   v
+API Node.js
+   |
+   | postgres:5432
+   v
+PostgreSQL
+
+La comunicación entre los servicios se realiza mediante la red interna de Docker y los nombres de servicio definidos en Docker Compose.

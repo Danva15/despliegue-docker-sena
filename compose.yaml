@@ -3,25 +3,34 @@ services:
     image: postgres:18-alpine
     container_name: despliegue-postgres
     environment:
-      POSTGRES_DB: despliegue_db
-      POSTGRES_USER: app_user
-      POSTGRES_PASSWORD: app_password
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-
+    networks:
+      - interna
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   api:
     build:
       context: ./api
     container_name: despliegue-api
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: despliegue_db
-      DB_USER: app_user
-      DB_PASSWORD: app_password
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    networks:
+      - interna
 
   nginx:
     image: nginx:1.30-alpine
@@ -32,6 +41,12 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - api
+    networks:
+      - interna
 
 volumes:
   postgres_data:
+
+networks:
+  interna:
+    driver: bridge
